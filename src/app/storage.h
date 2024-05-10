@@ -23,7 +23,13 @@
 #define STORAGE_BLOCK_DATA_SIZE 3
 
 // EEPROM base address
-#define STORAGE_BASE_ADDRESS 0x0000
+#define STORAGE_BASE_ADDRESS         0x0000
+
+// EEPROM rear address
+#define STORAGE_REAR_ADDRESS         0x03ff
+
+// EEPROM data length address
+#define STORAGE_DATA_LENGTH_ADDRESS  0x03fe
 
 // EEPROM block size
 #define STORAGE_BLOCK_SIZE (STORAGE_BLOCK_DATA_SIZE + sizeof(timestamp_t))

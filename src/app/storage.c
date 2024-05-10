@@ -18,6 +18,9 @@
 static uint8_t storage_front = 0;
 static uint8_t storage_rear = 0;
 
+// Length of data
+static uint8_t LengthOfData = 0;
+
 // Function to calculate EEPROM address for a given block index
 static uint16_t get_eeprom_address(uint8_t block_index) {
     if (block_index >= TOTAL_BLOCKS) {
@@ -40,6 +43,10 @@ static uint8_t bcd_to_int(uint8_t bcd) {
 storage_status_t storage_init(void) {
     // Initialize EEPROM
     eeprom_busy_wait();
+    
+    // Read last version of rear and data length
+    storage_rear = eeprom_read_byte(STORAGE_REAR_ADDRESS);
+    LengthOfData = eeprom_read_byte(STORAGE_DATA_LENGTH_ADDRESS);
     
     return STORAGE_OK;
 }
@@ -66,14 +73,23 @@ storage_status_t storage_enqueue_block(const uint8_t *p_data) {
     
     // Update storage rear
     storage_rear = increment_index(storage_rear);
-
+    eeprom_write_byte(STORAGE_REAR_ADDRESS, storage_rear);
+    
+    // Update storage length of data
+    if(LengthOfData >= TOTAL_BLOCKS){
+        eeprom_write_byte(STORAGE_DATA_LENGTH_ADDRESS, LengthOfData);
+    }
+    else{
+        eeprom_write_byte(STORAGE_DATA_LENGTH_ADDRESS, ++LengthOfData);
+    }
+    
     return STORAGE_OK;
 }
 
 // Function to get the number of blocks stored in circular queue
 storage_status_t storage_get_length(uint8_t *p_length) {
     // Calculate length of data stored in circular queue
-    *p_length = (storage_rear >= storage_front) ? (storage_rear - storage_front) : (TOTAL_BLOCKS - (storage_front - storage_rear));
+    *p_length = (LengthOfData >= TOTAL_BLOCKS) ? (TOTAL_BLOCKS) : (storage_rear - storage_front);
     
     return STORAGE_OK;
 }
@@ -102,5 +118,3 @@ storage_status_t storage_get_block(uint8_t index, uint8_t *p_data, timestamp_t *
     
     return STORAGE_OK;
 }
-
-
