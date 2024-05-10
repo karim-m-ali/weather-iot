@@ -17,7 +17,7 @@
 #define LDR_pin 0
 
 weather_status_t weather_init(void){
-  ADC_Init();
+  ADC_init();
   dht11_init();
 return Weather_OK;
 }
