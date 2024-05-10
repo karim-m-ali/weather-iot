@@ -24,7 +24,7 @@ return Weather_OK;
 
 weather_status_t weather_measures(uint8_t * temperature
 		                         ,uint8_t * humidity
-								 ,uint8_t * light_percentage){
+					 ,uint8_t * light_percentage){
 
 
 	if(dht11_read ( temperature, humidity)){
