@@ -10,6 +10,8 @@
 #ifndef WEATHER_H
 #define WEATHER_H
 
+#include <stdint.h>
+
 
 typedef enum{
 	Weather_OK,

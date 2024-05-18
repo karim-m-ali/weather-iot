@@ -11,8 +11,8 @@
 #define WEATHER_C
 
 #include "weather.h"
-#include "./hal/dht11.h"
-#include "./mcal/adc.h"
+#include "../hal/dht11.h"
+#include "../mcal/adc.h"
 
 #define LDR_pin 0
 
