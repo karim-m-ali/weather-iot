@@ -12,42 +12,42 @@
  */
 
 #include "storage.h"
-#include "../hal/ds1307.h"
+#include "../mcal/twi.h"
+#include <avr/eeprom.h>
 #include <stdint.h>
+#include "../hal/lcd.h"
 
 // Circular queue indices
-static uint8_t storage_front = 0;
-static uint8_t storage_rear = 0;
-
-// Length of data
-static uint8_t LengthOfData = 0;
+static uint8_t g_storage_cursor = 0;
 
 // Function to calculate EEPROM address for a given block index
-static uint16_t get_eeprom_address(uint8_t block_index) {
+static storage_status_t get_eeprom_address(uint8_t block_index, 
+    void **pp_address) {
     if (block_index >= TOTAL_BLOCKS) {
         return STORAGE_ERROR;
     }
-    return STORAGE_BASE_ADDRESS + (block_index * STORAGE_BLOCK_SIZE);
+    *pp_address = (void *)(STORAGE_BASE_ADDRESS + (block_index * 
+          STORAGE_BLOCK_SIZE));
+    return STORAGE_OK;
 }
 
 // Function to increment a circular queue index
-static uint8_t increment_index(uint8_t index) {
-    return (index + 1) % TOTAL_BLOCKS;
+static void move_cursor(void) {
+    g_storage_cursor = (g_storage_cursor + 1) % TOTAL_BLOCKS;
+    eeprom_write_byte((void *)STORAGE_CURSOR_ADDRESS, g_storage_cursor);
 }
 
-// Function to convert BCD to integer
-static uint8_t bcd_to_int(uint8_t bcd) {
-    return ((uint8_t)((bcd >> 4) * 10)) + ((uint8_t)(bcd & 0x0F));
-}
 
 // Function to initialize storage system
 storage_status_t storage_init(void) {
     // Initialize EEPROM
     eeprom_busy_wait();
-    
+
     // Read last version of rear and data length
-    storage_rear = eeprom_read_byte((const uint8_t *)STORAGE_REAR_ADDRESS);
-    LengthOfData = eeprom_read_byte((const uint8_t *)STORAGE_DATA_LENGTH_ADDRESS);
+    g_storage_cursor = eeprom_read_byte((const uint8_t *)STORAGE_CURSOR_ADDRESS);
+
+    TWI_ConfigType twi_cfg = {.address = RTC_TWI_ADDRESS, .bit_rate = 100};
+    TWI_init(&twi_cfg);
     
     return STORAGE_OK;
 }
@@ -57,35 +57,30 @@ storage_status_t storage_enqueue_block(const uint8_t *p_data) {
   if (p_data == NULL) {
     return STORAGE_ERROR;
   }
+  lcd_text("one",' ');
     // Calculate timestamp
     RTC_Time_t timestamp;
-    RTC_getTime(&timestamp);
-    uint8_t arr[7] = {bcd_to_int(timestamp.timeArr[0]), bcd_to_int(timestamp.timeArr[1]),
-                      bcd_to_int(timestamp.timeArr[2]), bcd_to_int(timestamp.timeArr[3]),
-                      bcd_to_int(timestamp.timeArr[4]), bcd_to_int(timestamp.timeArr[5]),
-                      bcd_to_int(timestamp.timeArr[6])};
+    if (RTC_getTime(&timestamp) != RTC_SUCCESS) {
+      return STORAGE_ERROR;
+    }
 
+  lcd_text("two",' ');
     // Calculate EEPROM address for the given block index
-    void *eeprom_address = (void *)get_eeprom_address(storage_rear);
+    void *eeprom_address;
+    if (get_eeprom_address(g_storage_cursor, &eeprom_address) != STORAGE_OK) {
+      return STORAGE_ERROR;
+    }
+  lcd_text("three",' ');
     
     // Write data to EEPROM
     eeprom_write_block(p_data, eeprom_address, STORAGE_BLOCK_DATA_SIZE);
     eeprom_address += STORAGE_BLOCK_DATA_SIZE;
     
     // Write timestamp to EEPROM
-    eeprom_write_block(arr, eeprom_address, sizeof(arr));
+    eeprom_write_block(timestamp.timeArr, eeprom_address, sizeof(timestamp.timeArr));
     
     // Update storage rear
-    storage_rear = increment_index(storage_rear);
-    eeprom_write_byte((void *)STORAGE_REAR_ADDRESS, storage_rear);
-    
-    // Update storage length of data
-    if(LengthOfData >= TOTAL_BLOCKS){
-        eeprom_write_byte((void *)STORAGE_DATA_LENGTH_ADDRESS, LengthOfData);
-    }
-    else{
-        eeprom_write_byte((void *)STORAGE_DATA_LENGTH_ADDRESS, ++LengthOfData);
-    }
+    move_cursor();
     
     return STORAGE_OK;
 }
@@ -96,20 +91,22 @@ storage_status_t storage_get_length(uint8_t *p_length) {
     return STORAGE_ERROR;
   }
     // Calculate length of data stored in circular queue
-    *p_length = (LengthOfData >= TOTAL_BLOCKS) ? (TOTAL_BLOCKS) : (storage_rear - storage_front);
+    *p_length = TOTAL_BLOCKS;
     
     return STORAGE_OK;
 }
 
 // Function to get block of data
-storage_status_t storage_get_block(uint8_t index, uint8_t *p_data, timestamp_t *p_timestamp) {
+storage_status_t storage_get_block(uint8_t index, uint8_t *p_data, 
+    RTC_Time_t *p_timestamp) {
     // Check if index is valid
     if (index >= TOTAL_BLOCKS || p_data == NULL) {
         return STORAGE_ERROR;
     }
 
     // Calculate EEPROM address for the given block index
-    void *eeprom_address = (void *)get_eeprom_address(index);
+    void *eeprom_address;
+    get_eeprom_address(index, &eeprom_address);
     
     // Read data from EEPROM
     eeprom_read_block(p_data, eeprom_address, STORAGE_BLOCK_DATA_SIZE);
@@ -117,12 +114,8 @@ storage_status_t storage_get_block(uint8_t index, uint8_t *p_data, timestamp_t *
     
     // Read timestamp from EEPROM
     if (p_timestamp != NULL) {
-    uint8_t arr[7];
-    eeprom_read_block(arr, eeprom_address, sizeof(arr));
-    for (int i = 0; i < 7; i++)
-    {
-    	p_timestamp->timestampArr[i] = arr[i];
-    }
+      eeprom_read_block(p_timestamp->timeArr, eeprom_address, 
+          sizeof(p_timestamp->timeArr));
     }
     
     return STORAGE_OK;

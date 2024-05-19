@@ -17,7 +17,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "avr/eeprom.h"
+#include "../hal/ds1307.h"
 
 /* The size is application dependent */
 #define STORAGE_BLOCK_DATA_SIZE 3
@@ -25,45 +25,22 @@
 // EEPROM base address
 #define STORAGE_BASE_ADDRESS         0x0000
 
-// EEPROM rear address
-#define STORAGE_REAR_ADDRESS         0x03ff
-
-// EEPROM data length address
-#define STORAGE_DATA_LENGTH_ADDRESS  0x03fe
+// EEPROM cursor address
+#define STORAGE_CURSOR_ADDRESS         0x03ff
 
 // EEPROM block size
-#define STORAGE_BLOCK_SIZE (STORAGE_BLOCK_DATA_SIZE + sizeof(timestamp_t))
+#define STORAGE_BLOCK_SIZE (STORAGE_BLOCK_DATA_SIZE + sizeof(RTC_Time_t))
 
 // EEPROM size 
 #define EEPROM_SIZE 1024
 
 // total number of blocks
-#define TOTAL_BLOCKS (EEPROM_SIZE / STORAGE_BLOCK_SIZE)
+#define TOTAL_BLOCKS ((EEPROM_SIZE - 1) / STORAGE_BLOCK_SIZE)
 
 typedef enum {
   STORAGE_OK = 0,
   STORAGE_ERROR = 1,
 } storage_status_t;
-
-//typedef struct {
-//  uint32_t utc_year : 12, utc_month : 4, utc_day : 5, utc_hour : 6;
-//  uint8_t utc_minute : 6;
-//} storage_timestamp_t;
-
-/* Data Structure To Store Time either in an Array Or a struct
- * where array indices access the struct fields in the same order */
-typedef union{
-	uint8_t timestampArr[7];
-	struct{
-		uint8_t seconds;
-		uint8_t minutes;
-		uint8_t hours;
-		uint8_t dayOfWeek;
-		uint8_t dayOfMonth;
-		uint8_t month;
-		uint8_t year; 
-	}timestamp;
-}timestamp_t;
 
 // Function to initialize storage system
 storage_status_t storage_init(void);
@@ -76,6 +53,6 @@ storage_status_t storage_get_length(uint8_t *p_length);
 
 // Function to get block of data
 storage_status_t storage_get_block(uint8_t index, uint8_t *p_data,
-                                   timestamp_t *p_timestamp);
+                                   RTC_Time_t *p_timestamp);
 
 #endif /* STORAGE_H */
