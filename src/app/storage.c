@@ -15,7 +15,6 @@
 #include "../mcal/twi.h"
 #include <avr/eeprom.h>
 #include <stdint.h>
-#include "../hal/lcd.h"
 
 // Circular queue indices
 static uint8_t g_storage_cursor = 0;
@@ -57,20 +56,17 @@ storage_status_t storage_enqueue_block(const uint8_t *p_data) {
   if (p_data == NULL) {
     return STORAGE_ERROR;
   }
-  lcd_text("one",' ');
     // Calculate timestamp
     RTC_Time_t timestamp;
     if (RTC_getTime(&timestamp) != RTC_SUCCESS) {
       return STORAGE_ERROR;
     }
 
-  lcd_text("two",' ');
     // Calculate EEPROM address for the given block index
     void *eeprom_address;
     if (get_eeprom_address(g_storage_cursor, &eeprom_address) != STORAGE_OK) {
       return STORAGE_ERROR;
     }
-  lcd_text("three",' ');
     
     // Write data to EEPROM
     eeprom_write_block(p_data, eeprom_address, STORAGE_BLOCK_DATA_SIZE);
