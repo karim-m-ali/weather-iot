@@ -11,7 +11,7 @@
 #include "../mcal/gpio.h"
 #include <stdint.h>
 
-#define DHT11_PORT GPIO_PORT_B
+#define DHT11_PORT GPIO_PORT_C
 #define DHT11_PIN GPIO_PIN_6
 
 typedef enum : uint8_t {
