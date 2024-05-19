@@ -100,6 +100,13 @@ storage_status_t storage_get_block(uint8_t index, uint8_t *p_data,
         return STORAGE_ERROR;
     }
 
+    // Move index to start from latest element
+    if (g_storage_cursor > index) {
+      index = (g_storage_cursor - index - 1) % TOTAL_BLOCKS;
+    } else {
+      index = (g_storage_cursor + (TOTAL_BLOCKS - 1) - index) % TOTAL_BLOCKS;
+    }
+
     // Calculate EEPROM address for the given block index
     void *eeprom_address;
     get_eeprom_address(index, &eeprom_address);
