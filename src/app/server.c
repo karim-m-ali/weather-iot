@@ -21,6 +21,7 @@ static uint8_t bcd_to_uint8(uint8_t bcd) {
 
 static const char *gh_response_str(const char *request_json_str) {
   uint8_t index = 0;
+  sscanf(request_json_str, "{\"index\": %hhu}", &index);
   gh_get_entry(index, &g_entry);
   sprintf(g_json_str,
           "{\"timestamp\":{\"hour\":%d,\"minute\":%d,\"second\":%d,"

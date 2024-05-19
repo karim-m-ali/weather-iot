@@ -36,9 +36,10 @@ void assert_ok(char *title, uint8_t call_return, uint8_t excepted_return) {
   }
 }
 
-inline void init(void) {
+void init(void) {
   lcd_init();
   lcd_text("init start..", ' ');
+  _delay_ms(2000); // for server_init
   assert_ok("init:server_init", server_init(), SERVER_OK);
   assert_ok("init:weather_init", weather_init(), Weather_OK);
   assert_ok("init:storage_init", storage_init(), STORAGE_OK);
@@ -46,7 +47,7 @@ inline void init(void) {
   lcd_text("init end..", ' ');
 }
 
-inline void routine(void) {
+void routine(void) {
   server_entry_data_t entry_data;
   lcd_text("routine start..", ' ');
   assert_ok("routine:weather_measures",

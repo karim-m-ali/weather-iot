@@ -11,8 +11,9 @@
  *******************************************************************************/
 
 #include<avr/io.h>
-#include"../common_macros.h"
 #include"twi.h"
+
+#define BIT_IS_CLEAR(REG,BIT) ( !(REG & (1<<BIT)) )
 
 /*
  * Description :
