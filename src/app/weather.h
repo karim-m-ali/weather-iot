@@ -24,6 +24,6 @@ weather_status_t weather_init(void);
 
 weather_status_t weather_measures(uint8_t * temperature
 		                         ,uint8_t * humidity
-					 ,uint8_t * light_percentage);
+					 ,uint8_t * light);
 
 #endif

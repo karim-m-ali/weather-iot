@@ -24,13 +24,13 @@ return Weather_OK;
 
 weather_status_t weather_measures(uint8_t * temperature
 		                         ,uint8_t * humidity
-					 ,uint8_t * light_percentage){
+					 ,uint8_t * light){
 
 
 	if(dht11_read ( temperature, humidity)){
 		return Weather_Error;
 	}
-	if(ADC_read ( light_percentage,LDR_pin)){
+	if(ADC_read ( light,LDR_pin)){
 			return Weather_Error;
 		}
 
