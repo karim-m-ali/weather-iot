@@ -7,9 +7,12 @@
 
 #include "server.h"
 #include "../hal/esp01.h"
+#include "storage.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#define B_INDEXED 0
 
 static void (*gh_get_entry)(uint8_t index, server_entry_t *p_entry);
 static char g_json_str[180];
@@ -20,8 +23,14 @@ static uint8_t bcd_to_uint8(uint8_t bcd) {
 }
 
 static const char *gh_response_str(const char *request_json_str) {
-  uint8_t index = 0;
+  uint8_t index;
+#if B_INDEXED
   sscanf(request_json_str, "{\"index\": %hhu}", &index);
+#else
+  static uint8_t prev_index = 0;
+  index = prev_index;
+  prev_index = (prev_index + 1) % TOTAL_BLOCKS;
+#endif
   gh_get_entry(index, &g_entry);
   sprintf(g_json_str,
           "{\"timestamp\":{\"hour\":%d,\"minute\":%d,\"second\":%d,"
