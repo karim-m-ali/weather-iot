@@ -72,7 +72,7 @@ uint8_t RTC_getTime(RTC_Time_t *time)
 
     /* Send Device Address with R/W = 1 (Read) */
     TWI_writeByte(RTC_TWI_ADDRESS | 0x01);
-    if (TWI_getStatus() != TWI_MT_SLA_W_ACK)
+    if (TWI_getStatus() != TWI_MT_SLA_R_ACK)
         return RTC_ERROR;
 
     /* Get The Time From The RTC Registers */
