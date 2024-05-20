@@ -60,12 +60,12 @@ This project involves developing a caching IoT-based weather monitoring system w
 ## Usage
 
 1. **Upload the firmware to the embedded device.**
-2. **Run the mobile application to connect to the embedded system server's WiFi access point.**      3. **View weather information on the mobile app's graphical interface.**
+2. **Run the mobile application to connect to the embedded system server's WiFi access point.**   
+3. **View weather information on the mobile app's graphical interface.**
 
 ## License
 
-This project is licensed under the terms of the GNU General Public License v3.0. See the [LICENSE](LI
-CENSE) file for details.
+This project is licensed under the terms of the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
