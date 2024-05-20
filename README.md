@@ -53,7 +53,6 @@ This project involves developing a caching IoT-based weather monitoring system w
    ```bash
    git clone https://github.com/kmuali/weather-iot
    ```
-
 2. **Build the project using the Makefile:**
    ```bash
    make flash-arduino
@@ -69,9 +68,8 @@ This project involves developing a caching IoT-based weather monitoring system w
 
 This project is licensed under the terms of the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for details.
 
-## Contributing
-
 1. **Fork the repository.**
 2. **Create a new branch for your feature or bugfix.**
 3. **Make your changes.**
 4. **Submit a pull request.**
+
